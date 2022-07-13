@@ -1,11 +1,93 @@
-import React, { Component } from "react";
+import { useState, useEffect} from "react";
 import From from "../Form/Form";
 import ContactList from "../ContactList/ContactList";
-import Filter from "../Form/Form";
-import s from './App.module.css'
+import Filter from "../Filter/Filter";
+import s from './App.module.css';
 
 
-class App extends Component { 
+let visibleContacts = [];
+
+function App() {
+    const [contacts, setContacts] = useState([]);
+    const [filter, setFilter] = useState("");
+
+    //componentDidMount
+    useEffect(() => {
+        const getContacts = localStorage.getItem('contacts');
+        const parsedContacts = JSON.parse(getContacts);
+
+        if (parsedContacts) { 
+            setContacts([...parsedContacts]);
+        };
+    }, []); 
+
+
+    //componentDidUpdate   ПРОБЛЕМА ТУТ !!!!
+    useEffect(() => {
+        if (contacts.length === 0) {
+            return
+        };
+        //ВОТ ДЕСЬ ТУТ!!!!
+        localStorage.setItem('contacts', JSON.stringify(contacts));
+    }, [contacts]);
+
+    const handleSubmit = data => {
+        let findName = contacts.find(item => item.name === data.name); 
+
+        if (findName) { 
+            return alert(`${data.name} is already in contact`)
+        } else { 
+            setContacts(contact => ([...contact, data]));
+        };
+    };
+
+    const handleFilter = (e) => {
+        setFilter(e.target.value);
+    };
+
+    const handleClickDeleteBtn = (id) => {
+        setContacts(prevState => prevState.filter(contact => contact.id !== id));
+    };
+
+    const getVisibleContacts = () => {
+        const filterTolowerCase = filter.toLowerCase();
+
+        return contacts.filter(
+            contact => contact.name.toLowerCase().includes(filterTolowerCase)
+        );
+    };
+
+    visibleContacts = getVisibleContacts();
+
+
+    return (
+        <div className={s.container}>
+            <h1>Phonebook</h1>
+            <From
+                onSubmit={handleSubmit}
+            />
+
+            <h2>Contacts</h2>
+            <Filter
+                value={filter}
+                onChange={handleFilter}
+            />
+
+            <ContactList
+                contacts={visibleContacts}
+                onDeleteClick={handleClickDeleteBtn}
+            />
+        </div>
+    );
+};
+
+export default App;
+
+
+////////////
+
+
+/* class OldApp extends Component { 
     state = {
         contacts: [],
         filter: ""
@@ -85,5 +167,4 @@ class App extends Component {
         ) 
     }
 }
-
-export default App
+ */

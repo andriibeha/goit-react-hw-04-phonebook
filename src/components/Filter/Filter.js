@@ -8,7 +8,7 @@ const Filter = ({value, onChange}) => {
                 value={value}
                 onChange={onChange} />
         </label>
-    )
+    );
 };
 
 export default Filter;
